@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="template1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-
+KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5Kk
+N" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-
+ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-
+JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-
+JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="col-md-6 offset-3">
+        <form method="post" th:action="@{save}">
+            <div>
+                <label>Student Number</label>
+                <input class="form-control" type="text" name="snumber" th:value="${student.studentNumber}">
+                <span th:errors="${student.studentNumber}"></span>
+            </div>
+            <div>
+                <label>Student Name</label>
+                <input class="form-control" type="text" name="name"
+                       th:value="${student.name}">
+                <span th:errors="${student.name}"></span>
+            </div>
+            <div>
+                <label>Course</label>
+                <input class="form-control" type="text" name="course"
+                       th:value="${student.courseName}">
+                <span th:errors="${student.courseName}"></span>
+            </div>
+            <div>
+                <label>Units</label>
+                <input class="form-control" type="text" name="units"
+                       th:value="${student.units}">
+                <span th:errors="${student.units}"></span>
+            </div>
+            <div>
+                <label>Grades</label>
+                <select th:field="*{student.grades}">
+                    <option value="A" >A</option>
+                    <option value="B" >B</option>
+                    <option value="C" >C</option>
+                    <option value="D" >D</option>
+                    <option value="F" >F</option>
+                </select>
+                <span th:errors="${student.grades}"></span>
+            </div>
+            <button type="submit" class="btn-primary" th:href="@{/index}">Save</button>
+            <button type="submit" class="btn-primary" th:href="@{/index}">Back</button>
+        </form>
+    </div>
+</section>
+</body>
+</html>
