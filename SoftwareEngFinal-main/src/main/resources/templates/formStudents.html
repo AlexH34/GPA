@@ -29,40 +29,46 @@ JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         <form method="post" th:action="@{save}">
             <div>
                 <label>Student Number</label>
-                <input class="form-control" type="text" name="number"
+                <input class="form-control" type="text" name="studentNumber" required
                        th:value="${student.studentNumber}">
                 <span th:errors="${student.studentNumber}"></span>
             </div>
             <div>
                 <label>Student Name</label>
-                <input class="form-control" type="text" name="name"
+                <input class="form-control" type="text" name="name" required
                        th:value="${student.name}">
                 <span th:errors="${student.name}"></span>
             </div>
             <div>
                 <label>Student Course</label>
-                <input class="form-control" type="course" name="course"
+                <input class="form-control" type="text" name="courseName" required
                        th:value="${student.courseName}">
                 <span th:errors="${student.courseName}"></span>
             </div>
             <div>
                 <label>Units</label>
-                <input class="form-control" type="text" name="units"
+                <input class="form-control" type="text" name="units" required
                        th:value="${student.units}">
                 <span th:errors="${student.units}"></span>
             </div>
             <div>
                 <label>Grades</label>
-                <select th:field="*{student.grades}">
-                    <option value="A" >A</option>
-                    <option value="B" >B</option>
-                    <option value="C" >C</option>
-                    <option value="D" >D</option>
-                    <option value="F" >F</option>
+                <select th:field="*{student.grades}" required>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="P">P</option>
+                    <option value="F">F</option>
                 </select>
 
             </div>
-            <button type="submit" class="btn-primary" th:href="@{/index}">Save</button>
+            <button type="submit" class="btn-primary">Save</button>
         </form>
     </div>
 </section>
@@ -70,4 +76,3 @@ JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
 
 </body>
 </html>
-

@@ -36,36 +36,39 @@
 </head>
 <body>
 
-<!--Fragment-->
 <div layout:fragment="content">
 
 
     <div>
-    <h1>Students GPA</h1>
-    <div class="container">
-        <div class="container" style="background: aqua">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Student NUmber</th>
-                    <th>Student Name</th>
-                    <th>GPA</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="p:${listStudents}">
-                    <td th:text="${p.getId()}"></td>
-                    <td th:text="${p.getName()}"></td>
-                    <td th:text="${p.getGpa()}"></td>
-                </tr>
-                </tbody>
-            </table>
+        <h1>Students GPA</h1>
+        <div class="container">
+            <div class="container" style="background: aqua">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Student NUmber</th>
+                        <th>Student Name</th>
+                        <th>GPA</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p:${listStudents}">
+                        <td th:text="${p.getStudentNumber()}"></td>
+                        <td th:text="${p.getName()}"></td>
+                        <td th:text="${p.getGpa()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
     </div>
 
 
     <h1> Students List</h1>
+    <div class="container mt-2">
+        <a th:href="@{/formStudents}" class="btn btn-primary mb-3">Add New Student</a>
+    </div>
+
     <div class="container mt-2 pre-scrollable">
         <div class="card-header"></div>
         <div class="card-body">

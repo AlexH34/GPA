@@ -27,42 +27,49 @@ JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
 <section layout:fragment="content">
     <div class="col-md-6 offset-3">
         <form method="post" th:action="@{save}">
+            <input type="hidden" name="id" th:value="${student.id}" />
             <div>
                 <label>Student Number</label>
-                <input class="form-control" type="text" name="snumber" th:value="${student.studentNumber}">
+                <input class="form-control" type="text" name="studentNumber" required th:value="${student.studentNumber}">
                 <span th:errors="${student.studentNumber}"></span>
             </div>
             <div>
                 <label>Student Name</label>
-                <input class="form-control" type="text" name="name"
+                <input class="form-control" type="text" name="name" required
                        th:value="${student.name}">
                 <span th:errors="${student.name}"></span>
             </div>
             <div>
                 <label>Course</label>
-                <input class="form-control" type="text" name="course"
+                <input class="form-control" type="text" name="courseName" required
                        th:value="${student.courseName}">
                 <span th:errors="${student.courseName}"></span>
             </div>
             <div>
                 <label>Units</label>
-                <input class="form-control" type="text" name="units"
+                <input class="form-control" type="text" name="units" required
                        th:value="${student.units}">
                 <span th:errors="${student.units}"></span>
             </div>
             <div>
                 <label>Grades</label>
-                <select th:field="*{student.grades}">
-                    <option value="A" >A</option>
-                    <option value="B" >B</option>
-                    <option value="C" >C</option>
-                    <option value="D" >D</option>
-                    <option value="F" >F</option>
+                <select th:field="*{student.grades}" required>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="P">P</option>
+                    <option value="F">F</option>
                 </select>
                 <span th:errors="${student.grades}"></span>
             </div>
-            <button type="submit" class="btn-primary" th:href="@{/index}">Save</button>
-            <button type="submit" class="btn-primary" th:href="@{/index}">Back</button>
+            <button type="submit" class="btn-primary">Save</button>
+            <a th:href="@{/index}" class="btn-primary btn">Back</a>
         </form>
     </div>
 </section>
