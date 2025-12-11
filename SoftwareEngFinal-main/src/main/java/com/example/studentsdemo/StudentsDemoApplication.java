@@ -22,10 +22,11 @@ public class StudentsDemoApplication {
     CommandLineRunner init(StudentRepository repository, StudentController studentController) {
 
         return args -> {
-            // Initial data setup - FIX: Removed manual ID assignment (101, 102, 103)
+            // FIX: Initial data setup modified to use different grades for Student 102
+            // John: Course 1 (2 units, A) + Course 2 (3 units, C) -> GPA should be 2.80
             Student s1 = repository.save(new Student(102, "John","CCSIS 12",2, "A",0.0));
-            Student s2 = repository.save(new Student(102, "Jack", "CCSIS 12",3,"A" ,0.0));
-            Student s3 = repository.save(new Student(103, "Don","CCSIS 12",4, "A",0.0));
+            Student s2 = repository.save(new Student(102, "John", "MATH 101",3,"C" ,0.0)); // Student 102, different course, different grade
+            Student s3 = repository.save(new Student(103, "Don","CSCI 200",4, "A",0.0));
 
             // Calculate GPA for initial students after saving
             studentController.calculateAndSaveGpaForStudent(s1);
@@ -33,6 +34,8 @@ public class StudentsDemoApplication {
 
             repository.findAll().forEach(System.out::println);
         };
+
+
     }*/
 
 

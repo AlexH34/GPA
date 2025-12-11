@@ -12,6 +12,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Comparator; // FIX: Added import for sorting/processing list
 
 @SessionAttributes({"a", "e"})
 @Controller
@@ -32,16 +34,31 @@ public class StudentController {
     @GetMapping(path = "index")
     private String students(Model model, @RequestParam(name = "keyword", defaultValue = "") String keyword) {
 
-        List<Student> students;
+        List<Student> allStudents;
         if (keyword.isEmpty()) {
-            students = studentRepository.findAll();
+            allStudents = studentRepository.findAll();
 
         } else {
             int key = Integer.parseInt(keyword);
-            students = studentRepository.findStudentById(key);
+            allStudents = studentRepository.findStudentById(key);
 
         }
-        model.addAttribute("listStudents", students);
+
+        // FIX: Create a list of unique students for the GPA summary table (Request #2)
+        // Group by studentNumber, keeping the first record encountered for the summary.
+        List<Student> uniqueStudents = allStudents.stream()
+                .collect(Collectors.toMap(
+                        Student::getStudentNumber,
+                        student -> student,
+                        (existing, replacement) -> existing // Keep the existing student record
+                ))
+                .values().stream()
+                .sorted(Comparator.comparing(Student::getStudentNumber))
+                .collect(Collectors.toList());
+
+        model.addAttribute("listUniqueStudents", uniqueStudents);
+        // Keep the original attribute name for the detailed list (course records)
+        model.addAttribute("listStudents", allStudents);
         return "students";
     }
 
@@ -79,29 +96,25 @@ public class StudentController {
             return "formStudents";
         }
 
-        // FIX: Implement Student Number uniqueness validation
+        // FIX: Validate name consistency for the student number (Request #1)
         List<Student> existingStudents = studentRepository.findByStudentNumber(student.getStudentNumber());
 
-        boolean isDuplicate = false;
+        String submittedName = student.getName();
+        Integer submittedStudentNumber = student.getStudentNumber();
+        boolean isNameMismatch = false;
 
-        if (student.getId() == null) {
-            // Case 1: Adding a new student
-            if (!existingStudents.isEmpty()) {
-                isDuplicate = true;
-            }
-        } else {
-            // Case 2: Editing an existing student
-            for (Student existing : existingStudents) {
-                // If a record with the same studentNumber exists AND its ID is different from the current student's ID, it's a duplicate.
-                if (!existing.getId().equals(student.getId())) {
-                    isDuplicate = true;
-                    break;
-                }
+        // Check 1: If any records with this studentNumber already exist
+        if (!existingStudents.isEmpty()) {
+            String existingName = existingStudents.get(0).getName();
+
+            // If the submitted name is different from the existing name, we have a conflict.
+            if (!existingName.equals(submittedName)) {
+                isNameMismatch = true;
             }
         }
 
-        if (isDuplicate) {
-            model.addAttribute("errorMessage", "Student Number " + student.getStudentNumber() + " is already in use by another student.");
+        if (isNameMismatch) {
+            model.addAttribute("errorMessage", "Student Number " + submittedStudentNumber + " is already associated with the name '" + existingStudents.get(0).getName() + "'. The name must be consistent across all records.");
             // If editing, return to editStudents form
             if (student.getId() != null) {
                 return "editStudents";

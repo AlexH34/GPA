@@ -52,7 +52,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="p:${listStudents}">
+                    <tr th:each="p:${listUniqueStudents}">
                         <td th:text="${p.studentNumber}"></td>
                         <td th:text="${p.name}"></td>
                         <td th:text="${#numbers.formatDecimal(p.gpa, 0, 2)}"></td>
