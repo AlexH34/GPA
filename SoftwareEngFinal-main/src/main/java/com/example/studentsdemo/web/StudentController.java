@@ -13,39 +13,52 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Comparator; // FIX: Added import for sorting/processing list
+import java.util.Comparator;
 
+/**
+ * Controller for handling student course records and GPA calculations.
+ */
 @SessionAttributes({"a", "e"})
 @Controller
 @AllArgsConstructor
-
 public class StudentController {
 
     @Autowired
     private StudentRepository studentRepository;
     static  int num =0;
 
-    // Redirects the root path to /index
+    /**
+     * Redirects the root path to /index.
+     */
     @GetMapping("/")
     public String redirectToIndex() {
         return "redirect:/index";
     }
 
+    /**
+     * Handles the student list view, supporting search by student ID.
+     * It prepares two lists:
+     * 1. A detailed list of all course records (listStudents).
+     * 2. A summary list of unique students with their overall GPA (listUniqueStudents).
+     *
+     * @param model The Spring UI model.
+     * @param keyword Optional keyword for searching by student ID.
+     * @return The "students" view template.
+     */
     @GetMapping(path = "index")
     private String students(Model model, @RequestParam(name = "keyword", defaultValue = "") String keyword) {
 
         List<Student> allStudents;
         if (keyword.isEmpty()) {
             allStudents = studentRepository.findAll();
-
         } else {
+            // Search logic assumes keyword is an integer ID
             int key = Integer.parseInt(keyword);
             allStudents = studentRepository.findStudentById(key);
-
         }
 
-        // FIX: Create a list of unique students for the GPA summary table (Request #2)
-        // Group by studentNumber, keeping the first record encountered for the summary.
+        // Create a list of unique students for the GPA summary table.
+        // Group by studentNumber, keeping the first record encountered to represent the student.
         List<Student> uniqueStudents = allStudents.stream()
                 .collect(Collectors.toMap(
                         Student::getStudentNumber,
@@ -57,22 +70,29 @@ public class StudentController {
                 .collect(Collectors.toList());
 
         model.addAttribute("listUniqueStudents", uniqueStudents);
-        // Keep the original attribute name for the detailed list (course records)
+        // Add the original list of course records (detailed list)
         model.addAttribute("listStudents", allStudents);
         return "students";
     }
 
 
+    /**
+     * Deletes a student course record by its ID and recalculates the student's GPA.
+     *
+     * @param id The ID of the course record to delete.
+     * @param model The Spring UI model (unused but kept for method signature context).
+     * @return Redirects to the index page.
+     */
     @GetMapping("/delete")
     public String deleteStudent(@RequestParam(name = "id", required = true) int id, Model model) {
-        // Find the student to delete to get the studentNumber for GPA update
+        // Find the student record before deletion to get the studentNumber for GPA update
         Student deletedStudent = studentRepository.findById(id).orElse(null);
 
         studentRepository.deleteById(id);
 
-        // Re-calculate GPA for the student after deletion
+        // Re-calculate GPA for the student after a course record deletion
         if (deletedStudent != null) {
-            // Create a transient Student object for the GPA calculation logic to use the studentNumber
+            // Create a temporary Student object to hold the studentNumber for GPA recalculation
             Student dummyStudent = new Student();
             dummyStudent.setStudentNumber(deletedStudent.getStudentNumber());
             calculateAndSaveGpaForStudent(dummyStudent);
@@ -81,14 +101,30 @@ public class StudentController {
         return "redirect:/index";
     }
 
+    /**
+     * Displays the form for adding a new student course record.
+     *
+     * @param model The Spring UI model.
+     * @return The "formStudents" view template.
+     */
     @GetMapping("/formStudents")
     public String formStudents(Model model) {
-
         model.addAttribute("student", new Student());
         return "formStudents";
     }
 
 
+    /**
+     * Handles saving a new or updated student course record.
+     * It includes validation to ensure the student name is consistent across all records for a given student number.
+     *
+     * @param model The Spring UI model.
+     * @param student The Student object populated from the form.
+     * @param bindingResult Validation results (not fully utilized for complex validation here).
+     * @param mm ModelMap for session attributes (a, e).
+     * @param session HttpSession (not fully utilized).
+     * @return Redirects to the index page or returns to the form if validation fails.
+     */
     @PostMapping(path = "/save")
     public String save(Model model, Student student, BindingResult
             bindingResult, ModelMap mm, HttpSession session) {
@@ -96,7 +132,7 @@ public class StudentController {
             return "formStudents";
         }
 
-        // FIX: Validate name consistency for the student number (Request #1)
+        // Validate name consistency: A studentNumber must always have the same student name.
         List<Student> existingStudents = studentRepository.findByStudentNumber(student.getStudentNumber());
 
         String submittedName = student.getName();
@@ -107,7 +143,7 @@ public class StudentController {
         if (!existingStudents.isEmpty()) {
             String existingName = existingStudents.get(0).getName();
 
-            // If the submitted name is different from the existing name, we have a conflict.
+            // Check for name conflict
             if (!existingName.equals(submittedName)) {
                 isNameMismatch = true;
             }
@@ -126,7 +162,7 @@ public class StudentController {
         // Proceed with saving if validation passes
         studentRepository.save(student);
 
-        // Call the GPA calculation and update method after saving
+        // Calculate and update GPA for the student after saving the new course record
         calculateAndSaveGpaForStudent(student);
 
         if (num == 2) {
@@ -136,12 +172,18 @@ public class StudentController {
             mm.put("a", 1);
             mm.put("e", 0);
         }
-        return "redirect:/index"; // Correct redirection
-
-
+        return "redirect:/index";
     }
 
 
+    /**
+     * Displays the form for editing an existing student course record.
+     *
+     * @param model The Spring UI model.
+     * @param id The ID of the course record to edit.
+     * @param session HttpSession (used for temporary state `num` and `info`).
+     * @return The "editStudents" view template.
+     */
     @GetMapping("/editStudents")
     public String editStudents(Model model, int id, HttpSession session) {
         num = 2;
@@ -152,7 +194,12 @@ public class StudentController {
         return "editStudents";
     }
 
-    // Helper method to convert grade string to point value
+    /**
+     * Converts a letter grade string to its corresponding GPA point value.
+     *
+     * @param grade The letter grade (e.g., "A+", "B", "F").
+     * @return The GPA point value (e.g., 4.33, 3.00, 0.00). Returns 0.0 if grade is null or not recognized.
+     */
     private double getGradePointValue(String grade) {
         if (grade == null) return 0.0;
         return switch (grade.toUpperCase()) {
@@ -171,43 +218,42 @@ public class StudentController {
         };
     }
 
-    // Calculates the weighted average GPA for the student and persists it
+    /**
+     * Calculates the weighted average GPA for a specific student and updates all of their course records in the database.
+     * It fetches only the records for the target student number, which improves performance.
+     *
+     * @param student A Student object containing the studentNumber for which to calculate the GPA.
+     */
     public void calculateAndSaveGpaForStudent(Student student) {
 
         if (student == null || student.getStudentNumber() == null) {
             return;
         }
 
-        List<Student> allCourses = studentRepository.findAll();
+        // Fetch only the courses for the target student
+        List<Student> allCourses = studentRepository.findByStudentNumber(student.getStudentNumber());
 
         double totalGradePoints = 0.0;
         int totalUnits = 0;
-        Integer targetStudentNumber = student.getStudentNumber();
 
         // 1. Calculate total grade points and total units
         for (Student s : allCourses) {
-            // Find all records for the student
-            if (s.getStudentNumber() != null && s.getStudentNumber().equals(targetStudentNumber)) {
+            // Calculate grade points for this course record: (Grade Point * Units)
+            double gradePoint = getGradePointValue(s.getGrades());
+            int units = s.getUnits() != null ? s.getUnits() : 0;
 
-                // Calculate grade points for this course record: (Grade Point * Units)
-                double gradePoint = getGradePointValue(s.getGrades());
-                int units = s.getUnits() != null ? s.getUnits() : 0;
-
-                totalGradePoints += gradePoint * units;
-                totalUnits += units;
-            }
+            totalGradePoints += gradePoint * units;
+            totalUnits += units;
         }
 
         double gpa = (totalUnits > 0) ? totalGradePoints / totalUnits : 0.0;
 
         // 2. Apply the newly calculated GPA to ALL of the student's records and save
+        // We iterate over the already filtered list `allCourses`
         for (Student s : allCourses) {
-            if (s.getStudentNumber() != null && s.getStudentNumber().equals(targetStudentNumber)) {
-                s.setGpa(gpa);
-                // Must save to persist the new GPA value
-                studentRepository.save(s);
-            }
+            s.setGpa(gpa);
+            // Save to persist the new GPA value
+            studentRepository.save(s);
         }
     }
-
 }

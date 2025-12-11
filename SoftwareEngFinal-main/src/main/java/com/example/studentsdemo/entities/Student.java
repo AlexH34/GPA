@@ -1,13 +1,16 @@
 package com.example.studentsdemo.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.Date;
-
+/**
+ * Represents a student's course record and associated GPA.
+ * Each record represents a single course taken by a student.
+ */
 @Data
-// Removed @AllArgsConstructor to fix conflict with @GeneratedValue in CommandLineRunner
 @NoArgsConstructor
 @Getter
 @Setter
@@ -21,9 +24,12 @@ public class Student {
     private String courseName;
     private Integer units;
     private String grades;
-    private Double gpa;
+    private Double gpa; // Overall GPA for the student
 
-    // Manual constructor for creating initial records without specifying the generated ID
+    /**
+     * Constructor for creating a new student course record.
+     * The 'id' is generated automatically by the database.
+     */
     public Student(Integer studentNumber, String name, String courseName, Integer units, String grades, Double gpa) {
         this.studentNumber = studentNumber;
         this.name = name;
