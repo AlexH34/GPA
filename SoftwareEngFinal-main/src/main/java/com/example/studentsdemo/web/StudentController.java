@@ -77,22 +77,54 @@ public class StudentController {
             bindingResult, ModelMap mm, HttpSession session) {
         if (bindingResult.hasErrors()) {
             return "formStudents";
-        } else {
-            // This save operation should now succeed because the ID will be generated
-            studentRepository.save(student);
-
-            // Call the GPA calculation and update method after saving
-            calculateAndSaveGpaForStudent(student);
-
-            if (num == 2) {
-                mm.put("e", 2);
-                mm.put("a", 0);
-            } else {
-                mm.put("a", 1);
-                mm.put("e", 0);
-            }
-            return "redirect:/index"; // Correct redirection
         }
+
+        // FIX: Implement Student Number uniqueness validation
+        List<Student> existingStudents = studentRepository.findByStudentNumber(student.getStudentNumber());
+
+        boolean isDuplicate = false;
+
+        if (student.getId() == null) {
+            // Case 1: Adding a new student
+            if (!existingStudents.isEmpty()) {
+                isDuplicate = true;
+            }
+        } else {
+            // Case 2: Editing an existing student
+            for (Student existing : existingStudents) {
+                // If a record with the same studentNumber exists AND its ID is different from the current student's ID, it's a duplicate.
+                if (!existing.getId().equals(student.getId())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        }
+
+        if (isDuplicate) {
+            model.addAttribute("errorMessage", "Student Number " + student.getStudentNumber() + " is already in use by another student.");
+            // If editing, return to editStudents form
+            if (student.getId() != null) {
+                return "editStudents";
+            }
+            // If adding, return to formStudents form
+            return "formStudents";
+        }
+
+        // Proceed with saving if validation passes
+        studentRepository.save(student);
+
+        // Call the GPA calculation and update method after saving
+        calculateAndSaveGpaForStudent(student);
+
+        if (num == 2) {
+            mm.put("e", 2);
+            mm.put("a", 0);
+        } else {
+            mm.put("a", 1);
+            mm.put("e", 0);
+        }
+        return "redirect:/index"; // Correct redirection
+
 
     }
 
@@ -107,7 +139,7 @@ public class StudentController {
         return "editStudents";
     }
 
-    // FIX: Helper method to convert grade string to point value, updated with new scores
+    // Helper method to convert grade string to point value
     private double getGradePointValue(String grade) {
         if (grade == null) return 0.0;
         return switch (grade.toUpperCase()) {

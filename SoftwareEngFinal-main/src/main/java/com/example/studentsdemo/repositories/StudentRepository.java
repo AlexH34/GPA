@@ -9,4 +9,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
 
     List<Student> findStudentById(int kw);
 
+    // FIX: Added method to find all records by Student Number for uniqueness check
+    List<Student> findByStudentNumber(Integer studentNumber);
+
 }

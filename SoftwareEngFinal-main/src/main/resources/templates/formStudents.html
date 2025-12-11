@@ -26,6 +26,10 @@ JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
 <body>
 <section layout:fragment="content">
     <div class="col-md-6 offset-3">
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
         <form method="post" th:action="@{save}">
             <div>
                 <label>Student Number</label>

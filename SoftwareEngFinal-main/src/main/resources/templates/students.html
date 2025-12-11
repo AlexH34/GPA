@@ -46,16 +46,16 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Student NUmber</th>
+                        <th>Student Number</th>
                         <th>Student Name</th>
                         <th>GPA</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="p:${listStudents}">
-                        <td th:text="${p.getStudentNumber()}"></td>
-                        <td th:text="${p.getName()}"></td>
-                        <td th:text="${p.getGpa()}"></td>
+                        <td th:text="${p.studentNumber}"></td>
+                        <td th:text="${p.name}"></td>
+                        <td th:text="${#numbers.formatDecimal(p.gpa, 0, 2)}"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -88,11 +88,11 @@
                 <tbody>
 
                 <tr th:each="p:${listStudents}">
-                    <td th:text="${p.getStudentNumber()}"></td>
-                    <td th:text="${p.getName()}"></td>
-                    <td th:text="${p.getCourseName()}"></td>
-                    <td th:text="${p.getUnits()}"></td>
-                    <td th:text="${p.getGrades()}"></td>
+                    <td th:text="${p.studentNumber}"></td>
+                    <td th:text="${p.name}"></td>
+                    <td th:text="${p.courseName}"></td>
+                    <td th:text="${p.units}"></td>
+                    <td th:text="${p.grades}"></td>
                     <td>
                         <a class="btn btn-danger" onclick="return confirm('Are you sure want to delete?')"
                            th:href="@{delete(id=${p.id})}">Delete</a>
